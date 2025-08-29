@@ -7,7 +7,7 @@
 <title>Verbinde …</title>
 <style>
 :root{
-  --bg:#0b0f14; --card:#0f1620; --muted:#8aa0b3; --accent:#73d7ff; --ok:#8affc1; --warn:#ffc46b;
+  --bg:#0b0f14; --card:#0f1620; --muted:#8aa0b3; --accent:#73d7ff; --ok:#8affc1;
 }
 *{box-sizing:border-box} html,body{height:100%}
 body{
@@ -37,13 +37,23 @@ a{color:var(--accent); text-decoration:none}
 .step.done .dot{background:var(--ok)}
 .line{height:2px; flex:1; background:#1a2534}
 
-/* Bars (indeterminate) */
-.bar{height:10px; background:#0b1420; border-radius:999px; overflow:hidden; position:relative; margin-top:8px}
-.fill{height:100%; width:35%; background:linear-gradient(90deg,var(--accent),var(--ok))}
-.bar.indet .fill{animation:indetMove 1.15s linear infinite}
-@keyframes indetMove{0%{transform:translateX(-120%)}100%{transform:translateX(300%)}}
+/* Bars (indeterminate runner) */
+.bar{position:relative; height:10px; background:#0b1420; border-radius:999px; overflow:hidden; margin-top:8px}
+.runner{
+  position:absolute; top:0; bottom:0; width:38%; left:-38%;
+  background:linear-gradient(90deg, rgba(115,215,255,.15), rgba(138,255,193,.25), rgba(115,215,255,.15));
+  border-radius:999px; filter:saturate(140%);
+  animation:run 1.6s linear infinite;
+}
+.fill{
+  position:absolute; inset:0 auto 0 0; width:0%;
+  background:linear-gradient(90deg,var(--accent),var(--ok));
+  border-radius:999px; transition:width .25s ease-in-out;
+}
+.bar.done .runner{display:none}
+.bar.done .fill{width:100%}
 
-/* states & text */
+/* Rows & small text */
 .row{display:grid; gap:10px}
 .label{display:flex; justify-content:space-between; gap:12px; font-size:14px; color:#cfe3f5}
 .sub{color:var(--muted); font-size:12px; margin-top:4px; white-space:nowrap; text-overflow:ellipsis; overflow:hidden}
@@ -52,8 +62,10 @@ a{color:var(--accent); text-decoration:none}
 .footer{display:flex; gap:12px; flex-wrap:wrap; margin-top:18px; color:var(--muted); font-size:13px}
 .small{font-size:12px; color:#9fb3c9}
 
-/* freeze animation when done */
-.bar.done .fill{animation:none; width:100%}
+@keyframes run{
+  0%   { transform:translateX(0) }
+  100% { transform:translateX(260%) }
+}
 </style>
 </head>
 <body>
@@ -83,20 +95,20 @@ a{color:var(--accent); text-decoration:none}
       <div class="row" style="margin-top:6px">
         <!-- Workshop -->
         <div>
-          <div class="label"><span>Workshop-Downloads</span><span id="w-right">lädt …</span></div>
-          <div class="bar indet" id="w-bar"><div class="fill"></div></div>
-          <div class="sub" id="w-sub">Warte auf Workshop …</div>
+          <div class="label"><span>Workshop-Downloads</span><span id="w-state">läuft …</span></div>
+          <div class="bar" id="w-bar"><div class="runner"></div><div class="fill"></div></div>
+          <div class="sub" id="w-sub"></div>
         </div>
         <!-- Server -->
         <div>
-          <div class="label"><span>Server-Content</span><span id="s-right">lädt …</span></div>
-          <div class="bar indet" id="s-bar"><div class="fill"></div></div>
-          <div class="sub" id="s-sub">Warte auf Server-Dateien …</div>
+          <div class="label"><span>Server-Content</span><span id="s-state">wartet …</span></div>
+          <div class="bar" id="s-bar"><div class="runner"></div><div class="fill"></div></div>
+          <div class="sub" id="s-sub"></div>
         </div>
         <!-- Init -->
         <div>
-          <div class="label"><span>Initialisierung</span><span id="i-right">wartet …</span></div>
-          <div class="bar indet" id="i-bar"><div class="fill"></div></div>
+          <div class="label"><span>Initialisierung</span><span id="i-state">wartet …</span></div>
+          <div class="bar" id="i-bar"><div class="runner"></div><div class="fill"></div></div>
           <div class="sub" id="i-sub">Warte auf Client-Info …</div>
         </div>
       </div>
@@ -121,37 +133,36 @@ a{color:var(--accent); text-decoration:none}
 <script>
 (() => {
   const $ = id => document.getElementById(id);
+  const p = new URLSearchParams(location.search);
 
-  // Spielername aus Query (bevorzugt), sonst SteamID
-  const qp = new URLSearchParams(location.search);
-  const qpName = decodeURIComponent((qp.get('name')||qp.get('nick')||qp.get('player')||qp.get('n')||'').replace(/\+/g,' ')).trim();
+  // Grunddaten (Map aus URL, Name bevorzugt aus ?name= / ?nick=, sonst SteamID)
+  $('map').textContent = p.get('map') || 'Unbekannt';
+  const urlName = p.get('name') || p.get('nick');
+  if (urlName) $('me').textContent = urlName;
 
-  // Grunddaten aus URL für sofortige Anzeige
-  $('map').textContent = qp.get('map') || 'Unbekannt';
-  $('me').textContent  = qpName || qp.get('sid') || '—';
-
-  // Step/Phase-Helpers
+  // Helper: Steps/Bars steuern
   const steps = {
-    work: { stepEl: $('st-work'), bar: $('w-bar'), right: $('w-right'), sub: $('w-sub') },
-    srv:  { stepEl: $('st-srv'),  bar: $('s-bar'), right: $('s-right'), sub: $('s-sub') },
-    init: { stepEl: $('st-init'), bar: $('i-bar'), right: $('i-right'), sub: $('i-sub') }
+    work: { step:$('st-work'), bar:$('w-bar'), state:$('w-state'), sub:$('w-sub'), done:false },
+    srv:  { step:$('st-srv'),  bar:$('s-bar'), state:$('s-state'), sub:$('s-sub'), done:false },
+    init: { step:$('st-init'), bar:$('i-bar'), state:$('i-state'), sub:$('i-sub'), done:false }
   };
-  let active = 'work';
+  let current = 'work';
 
-  function setActive(key){
-    ['work','srv','init'].forEach(k=>{
-      const c = steps[k].stepEl.classList;
-      c.remove('active');
+  function setActive(k){
+    ['work','srv','init'].forEach(x=>{
+      steps[x].step.classList.remove('active');
+      if (steps[x].done) steps[x].step.classList.add('done');
     });
-    steps[key].stepEl.classList.add('active');
-    active = key;
+    steps[k].step.classList.add('active');
+    current = k;
   }
-
-  function markDone(key, text){
-    steps[key].stepEl.classList.add('done');
-    steps[key].bar.classList.remove('indet');
-    steps[key].bar.classList.add('done');
-    steps[key].right.textContent = text || 'fertig';
+  function markDone(k, label){
+    const s = steps[k];
+    if (s.done) return;
+    s.done = true;
+    s.bar.classList.add('done');     // stop runner, fill = 100%
+    s.step.classList.add('done');    // green dot
+    if (label) s.state.textContent = label;
   }
 
   // ===== GMod Callbacks =====
@@ -159,51 +170,65 @@ a{color:var(--accent); text-decoration:none}
     $('sv').textContent  = serverName || 'Unbekannt';
     $('sv2').textContent = serverName || 'deinem Server';
     $('gm').textContent  = gamemode  || 'TTT2';
-    if (mapName) $('map').textContent = mapName;
-
-    // Name bevorzugen, sonst SteamID
-    $('me').textContent = qpName || steamID || '—';
+    if (mapName)  $('map').textContent = mapName;
+    // Spieleranzeige: URL-Name hat Vorrang, sonst SteamID
+    if (!urlName && steamID) $('me').textContent = steamID;
   };
 
-  // Wir ignorieren die Prozent-Callbacks absichtlich (falsch/inkonsistent).
-  window.SetFilesTotal = function(){ /* noop (indeterminierte Balken) */ };
-  window.SetFilesNeeded = function(){ /* noop (indeterminierte Balken) */ };
-
+  // Wir ignorieren Zahlen komplett – nur hübscher Dateiname
+  window.SetFilesTotal = function(){};   // bewusst leer
+  window.SetFilesNeeded = function(){};  // bewusst leer
   window.DownloadingFile = function(path){
     $('file').textContent = (path||'').split('/').slice(-3).join('/');
-    // Kleiner UX-Touch: zeige Datei unter der aktuell aktiven Phase
-    if (active === 'work') steps.work.sub.textContent = 'Lade: ' + $('file').textContent;
-    else if (active === 'srv') steps.srv.sub.textContent = 'Lade: ' + $('file').textContent;
   };
 
+  // Status-Mapping auf Phasen
   window.SetStatusChanged = function(status){
-    const s = (status||'').toLowerCase();
+    const raw = status || '';
+    const s = raw.toLowerCase();
 
-    // rudimentäres Phasen-Mapping nur für Optik
-    if (s.includes('workshop')) { setActive('work'); steps.work.sub.textContent = status; }
-    else if (s.includes('download') || s.includes('materials') || s.includes('models') || s.includes('.bsp') || s.includes('file')) {
-      steps.work.stepEl.classList.add('done'); setActive('srv'); steps.srv.sub.textContent = status;
-    }
-    else if (s.includes('sending client info') || s.includes('precaching') || s.includes('client info') || s.includes('parsing')) {
-      steps.work.stepEl.classList.add('done'); steps.srv.stepEl.classList.add('done');
-      setActive('init'); steps.init.sub.textContent = status;
-      // wenn wir hier sind, frieren wir die Balken hübsch ein
-      markDone('work'); markDone('srv'); markDone('init','bereit');
+    // Workshop-Phase sichtbar halten
+    if (s.includes('workshop')) {
+      setActive('work');
+      steps.work.state.textContent = 'läuft …';
+      steps.work.sub.textContent = raw;
     }
 
-    // falls ein „complete“ kommt, markiere die aktuelle Phase als done
-    if (s.includes('complete')) {
-      if (active === 'work') { markDone('work'); setActive('srv'); }
-      else if (active === 'srv') { markDone('srv'); setActive('init'); }
+    // Übergang: Workshop -> Server-Content
+    if ((s.includes('download') || s.includes('materials') || s.includes('models') || s.includes('.bsp') || s.includes('file')) && !steps.srv.done) {
+      // Falls wir noch im Workshop hängen, schließe den ab
+      if (!steps.work.done) markDone('work','fertig');
+      setActive('srv');
+      steps.srv.state.textContent = 'lädt …';
+      steps.srv.sub.textContent = raw;
     }
+
+    // Workshop explizit fertig
+    if (s.includes('workshop complete') || s.includes('finished') && s.includes('workshop')) {
+      markDone('work','fertig');
+      setActive('srv');
+    }
+
+    // Übergang: Server-Content -> Initialisierung
+    if (s.includes('sending client info') || s.includes('precaching') || s.includes('parsing') || s.includes('client info')) {
+      if (!steps.work.done) markDone('work','fertig');
+      if (!steps.srv.done)  markDone('srv','fertig');
+      setActive('init');
+      steps.init.state.textContent = 'startet …';
+      steps.init.sub.textContent   = raw;
+    }
+
+    // Hübscher Subtext je Phase
+    if (current === 'work') steps.work.sub.textContent = raw;
+    else if (current === 'srv') steps.srv.sub.textContent = raw;
+    else steps.init.sub.textContent = raw;
   };
 
-  // Fallback, falls GMod gar nichts ruft (nur für Browser-Preview)
-  if (document.visibilityState !== 'hidden') {
-    // steppt automatisch durch, rein für Demo/Preview
-    setTimeout(()=>{ setActive('srv'); }, 2000);
-    setTimeout(()=>{ setActive('init'); }, 4000);
-    setTimeout(()=>{ markDone('work'); markDone('srv'); markDone('init','bereit'); }, 6000);
+  // Fallback im normalen Browser (zum Testen): Animation laufen lassen, nach etwas Zeit Phasen „fertig“ setzen
+  if (document.visibilityState !== 'hidden' && !/gmod/i.test(navigator.userAgent||'')) {
+    setTimeout(()=>{ steps.work.sub.textContent='Workshop (Demo)'; }, 400);
+    setTimeout(()=>{ markDone('work','fertig'); setActive('srv'); steps.srv.sub.textContent='Server-Content (Demo)'; }, 3500);
+    setTimeout(()=>{ markDone('srv','fertig'); setActive('init'); steps.init.sub.textContent='Initialisierung (Demo)'; }, 7000);
   }
 })();
 </script>
