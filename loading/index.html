@@ -3,31 +3,45 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Verbinde …</title>
 <meta http-equiv="Cache-Control" content="no-store" />
+<title>Verbinde …</title>
 <style>
-:root{--bg:#0b0f14;--card:#0f1620;--muted:#8aa0b3;--accent:#73d7ff;--ok:#8affc1;}
-*{box-sizing:border-box}html,body{height:100%}body{
-  margin:0; font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,Ubuntu,"Helvetica Neue",Arial;
-  color:#e8f0f7; background:radial-gradient(1200px 800px at 80% -10%,#132033 0%,transparent 60%),linear-gradient(180deg,#0b0f14,#0b0f14 60%,#0d1420);
+:root{
+  --bg:#0b0f14; --card:#0f1620; --muted:#8aa0b3; --accent:#73d7ff; --ok:#8affc1; --bad:#ff6b7a;
+}
+*{box-sizing:border-box} html,body{height:100%}
+body{
+  margin:0; font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Ubuntu,"Helvetica Neue",Arial;
+  color:#e8f0f7; background:
+    radial-gradient(1200px 800px at 80% -10%,#132033 0%,transparent 60%),
+    linear-gradient(180deg,#0b0f14,#0b0f14 60%,#0d1420);
 }
 .container{min-height:100%; display:flex; align-items:center; justify-content:center; padding:24px}
-.card{width:min(920px,94vw); background:linear-gradient(180deg,var(--card),#0c121a);
-  border:1px solid #1a2634; border-radius:16px; padding:26px 28px; box-shadow:0 10px 30px rgba(0,0,0,.35)}
-h1{margin:0 0 6px; font-size:28px; letter-spacing:.2px}
+.card{
+  width:min(940px,94vw); background:linear-gradient(180deg,var(--card),#0c121a);
+  border:1px solid #1a2634; border-radius:16px; padding:26px 28px; box-shadow:0 10px 30px rgba(0,0,0,.35)
+}
+h1{margin:0 0 8px; font-size:28px; letter-spacing:.2px}
 .meta{display:flex; flex-wrap:wrap; gap:10px 18px; color:var(--muted); font-size:14px; margin-bottom:18px}
 .badge{border:1px solid #243447; padding:6px 10px; border-radius:999px; background:#111926}
 .row{display:grid; grid-template-columns:1fr 1fr; gap:18px}
-.box{border:1px solid #1a2634; border-radius:14px; padding:16px; background:#0c131c}
+.box{border:1px solid #1a2634; border-radius:14px; padding:16px; background:#0c131c; min-height:140px}
 ul{margin:10px 0 0 18px; padding:0}
-.tip{opacity:.9; font-size:14px}
-.bar{height:6px; background:#0b1420; border-radius:999px; overflow:hidden; margin-top:14px}
-.fill{height:100%; width:35%; background:linear-gradient(90deg,var(--accent),var(--ok)); animation:load 2.4s infinite ease-in-out}
-@keyframes load{0%{transform:translateX(-35%)}50%{transform:translateX(65%)}100%{transform:translateX(-35%)}}
+.tip{opacity:.95; font-size:14px}
+.bar{height:10px; background:#0b1420; border-radius:999px; overflow:hidden; margin-top:14px; position:relative}
+.fill{
+  height:100%; width:0%;
+  background:linear-gradient(90deg,var(--accent) 0%, var(--ok) 100%);
+  transition:width .15s ease-in-out;
+}
+.percent{margin-top:8px; font-variant-numeric:tabular-nums}
+.status{margin-top:6px; color:var(--muted); font-size:14px; min-height:1.2em}
+.file{margin-top:4px; color:#a9bdd0; font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 .footer{display:flex; gap:12px; flex-wrap:wrap; margin-top:18px; color:var(--muted); font-size:13px}
 .kbd{border:1px solid #2a3a4f; background:#0b1320; border-radius:6px; padding:2px 6px}
 a{color:var(--accent); text-decoration:none}
 .logo{font-weight:700; letter-spacing:.5px}
+.small{font-size:12px; color:#9fb3c9}
 </style>
 </head>
 <body>
@@ -38,38 +52,125 @@ a{color:var(--accent); text-decoration:none}
     <span class="badge">Modus: <span id="gm">…</span></span>
     <span class="badge">Du: <span id="me">…</span></span>
   </div>
-  <h1 class="logo">Willkommen auf <span id="sv2">deinem Server</span> 👋</h1>
+
+  <h1 class="logo">Willkommen auf <span id="sv2">Gaming Mäuse</span> 👋</h1>
+
   <div class="row">
+    <div class="box">
+      <strong>Download-Fortschritt</strong>
+      <div class="bar"><div class="fill" id="bar"></div></div>
+      <div class="percent"><span id="pct">0</span>% – <span id="progLabel">Warte auf Daten …</span></div>
+      <div class="status" id="status"></div>
+      <div class="file" id="file"></div>
+      <div class="small" id="counts"></div>
+    </div>
+
     <div class="box">
       <strong>Tipps</strong>
       <ul class="tip">
-        <li>Drücke <span class="kbd">F1</span> für Hilfe/Regeln.</li>
-        <li>Mit <span class="kbd">F2</span> kommst du ins Shop-Menü (TTT2).</li>
-        <li><span class="kbd">Tab</span> zeigt die Rollen-Übersicht.</li>
-      </ul>
-      <div class="bar"><div class="fill"></div></div>
-    </div>
-    <div class="box">
-      <strong>Regeln (Kurz)</strong>
-      <ul class="tip">
-        <li>Kein RDM / kein Ghosting.</li>
-        <li>Höflich bleiben, keine Beleidigungen.</li>
-        <li>Admin-Anweisungen folgen.</li>
+        <li>Drücke <span class="kbd">F1</span> für Hilfe/Regeln/Settings.</li>
+        <li>Mit <span class="kbd">c</span> öffnest du den TTT2-Shop.</li>
+        <li><span class="kbd">Tab</span> zeigt die Übersicht.</li>
       </ul>
       <div class="footer">
-        <span>Discord: <a href="#" id="dc">später eintragen</a></span>
-        <span>Website: <a href="#" id="wb">ttt.dk0.dev</a></span>
+        <span>Website: <a href="https://dk0.dev" id="wb">ttt.dk0.dev</a></span>
       </div>
     </div>
   </div>
 </div></div>
+
 <script>
-(function(){
-  const p=new URLSearchParams(location.search);
-  const map=p.get('map')||'Unbekannt', gm=p.get('gm')||'TTT2', name=p.get('name')||'Spieler', sv=p.get('name')?p.get('name'):document.title;
-  const host=p.get('name')||'Gaming Mäuse - TTT';
-  const el=(id,v)=>{const e=document.getElementById(id); if(e) e.textContent=v};
-  el('map', map); el('gm', gm); el('me', name); el('sv', host); el('sv2', host);
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const qs = new URLSearchParams(location.search);
+  const state = {
+    total: 0,
+    needed: 0,
+    lastPct: 0,
+    doneForced: false
+  };
+
+  // Fallback-Werte aus URL (nur map/sid sind echt verfügbar)
+  const fallbackMap = qs.get('map') || 'Unbekannt';
+  const fallbackSid = qs.get('sid') || '—';
+  $('map').textContent = fallbackMap;
+  $('me').textContent = fallbackSid;
+
+  // Fortschritt updaten
+  function updateProgress() {
+    let pct = 0;
+    if (state.total > 0) {
+      const done = Math.max(0, state.total - state.needed);
+      pct = Math.round((done / state.total) * 100);
+    }
+    // Sicherstellen, dass es nicht rückwärts springt
+    pct = Math.max(state.lastPct, Math.min(100, pct));
+    state.lastPct = pct;
+
+    $('bar').style.width = pct + '%';
+    $('pct').textContent = pct;
+    $('progLabel').textContent = state.total
+      ? `Lade Dateien (${state.total - state.needed}/${state.total})`
+      : 'Initialisiere Workshop …';
+    $('counts').textContent = state.total
+      ? `${state.total - state.needed} von ${state.total} Dateien`
+      : '';
+  }
+
+  // GMod ruft diese Funktionen auf:
+  window.GameDetails = function(serverName, serverUrl, mapName, maxPlayers, steamID, gamemode, volume, language) {
+    $('sv').textContent = serverName || 'Unbekannt';
+    $('sv2').textContent = serverName || 'deinem Server';
+    $('map').textContent = mapName   || fallbackMap;
+    $('gm').textContent  = gamemode  || 'TTT2';
+    $('me').textContent  = steamID   || fallbackSid;
+  };
+
+  window.SetFilesTotal = function(total) {
+    state.total = Number(total) || 0;
+    updateProgress();
+  };
+
+  window.SetFilesNeeded = function(needed) {
+    state.needed = Number(needed) || 0;
+    updateProgress();
+  };
+
+  window.DownloadingFile = function(name) {
+    // Pfad kürzen für hübschere Anzeige
+    try {
+      const short = (name || '').split('/').slice(-3).join('/');
+      $('file').textContent = short;
+    } catch (_) {
+      $('file').textContent = name || '';
+    }
+  };
+
+  window.SetStatusChanged = function(status) {
+    $('status').textContent = status || '';
+    // Wenn GMod in späte Phasen geht, Fortschritt „soft“ vollenden
+    const s = (status || '').toLowerCase();
+    if (s.includes('sending client info') || s.includes('workshop complete') || s.includes('precaching') || s.includes('client info')) {
+      state.total = Math.max(state.total, 100);
+      state.needed = 0;
+      updateProgress();
+    }
+  };
+
+  // Falls GMod die Callbacks nicht liefert (Test im normalen Browser):
+  if (document.visibilityState !== 'hidden') {
+    // Leichte Fake-Animation, bis echte Zahlen kommen
+    let t = 0;
+    const fake = setInterval(() => {
+      if (state.total > 0 || state.doneForced) { clearInterval(fake); return; }
+      t = Math.min(90, t + Math.random() * 8);
+      $('bar').style.width = Math.round(t) + '%';
+      $('pct').textContent = Math.round(t);
+      $('progLabel').textContent = 'Warte auf Spiel-Client …';
+    }, 2500);
+    // Sicherheitsnetz: Nach 25s abschließen, damit der Balken nicht „im ersten Drittel“ stehen bleibt
+    setTimeout(() => { state.doneForced = true; $('bar').style.width = '100%'; $('pct').textContent = '100'; }, 25000);
+  }
 })();
 </script>
 </body>
