@@ -7,7 +7,7 @@
 <title>Verbinde …</title>
 <style>
 :root{
-  --bg:#0b0f14; --card:#0f1620; --muted:#8aa0b3; --accent:#73d7ff; --ok:#8affc1; --bad:#ff6b7a;
+  --bg:#0b0f14; --card:#0f1620; --muted:#8aa0b3; --accent:#73d7ff; --ok:#8affc1; --warn:#ffc46b;
 }
 *{box-sizing:border-box} html,body{height:100%}
 body{
@@ -18,34 +18,47 @@ body{
 }
 .container{min-height:100%; display:flex; align-items:center; justify-content:center; padding:24px}
 .card{
-  width:min(940px,94vw); background:linear-gradient(180deg,var(--card),#0c121a);
+  width:min(960px,94vw); background:linear-gradient(180deg,var(--card),#0c121a);
   border:1px solid #1a2634; border-radius:16px; padding:26px 28px; box-shadow:0 10px 30px rgba(0,0,0,.35)
 }
 h1{margin:0 0 8px; font-size:28px; letter-spacing:.2px}
 .meta{display:flex; flex-wrap:wrap; gap:10px 18px; color:var(--muted); font-size:14px; margin-bottom:18px}
 .badge{border:1px solid #243447; padding:6px 10px; border-radius:999px; background:#111926}
-.row{display:grid; grid-template-columns:1fr 1fr; gap:18px}
-.box{border:1px solid #1a2634; border-radius:14px; padding:16px; background:#0c131c; min-height:140px}
-ul{margin:10px 0 0 18px; padding:0}
-.tip{opacity:.95; font-size:14px}
-.bar{height:10px; background:#0b1420; border-radius:999px; overflow:hidden; margin-top:14px; position:relative}
-.fill{
-  height:100%; width:0%;
-  background:linear-gradient(90deg,var(--accent) 0%, var(--ok) 100%);
-  transition:width .15s ease-in-out;
-}
-.percent{margin-top:8px; font-variant-numeric:tabular-nums}
-.status{margin-top:6px; color:var(--muted); font-size:14px; min-height:1.2em}
-.file{margin-top:4px; color:#a9bdd0; font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.footer{display:flex; gap:12px; flex-wrap:wrap; margin-top:18px; color:var(--muted); font-size:13px}
-.kbd{border:1px solid #2a3a4f; background:#0b1320; border-radius:6px; padding:2px 6px}
+.grid{display:grid; grid-template-columns:1fr 1fr; gap:18px}
+.box{border:1px solid #1a2634; border-radius:14px; padding:16px; background:#0c131c}
 a{color:var(--accent); text-decoration:none}
 .logo{font-weight:700; letter-spacing:.5px}
+
+/* Stepper */
+.stepper{display:flex; align-items:center; gap:12px; margin-bottom:10px}
+.step{display:flex; align-items:center; gap:10px; color:var(--muted); font-size:14px}
+.dot{width:14px; height:14px; border-radius:50%; background:#1a2534; border:1px solid #253247}
+.step.active .dot{background:var(--accent); box-shadow:0 0 0 4px rgba(115,215,255,.18)}
+.step.done .dot{background:var(--ok)}
+.line{height:2px; flex:1; background:#1a2534}
+
+/* Bars */
+.bar{height:10px; background:#0b1420; border-radius:999px; overflow:hidden; position:relative; margin-top:8px}
+.fill{height:100%; width:0%; background:linear-gradient(90deg,var(--accent),var(--ok)); transition:width .15s ease-in-out}
+.indet::before{
+  content:""; position:absolute; inset:0;
+  background:linear-gradient(90deg, transparent 0%, rgba(255,255,255,.15) 35%, transparent 70%);
+  animation:flow 1.3s linear infinite;
+}
+@keyframes flow{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+
+.row{display:grid; gap:10px}
+.label{display:flex; justify-content:space-between; gap:12px; font-size:14px; color:#cfe3f5}
+.sub{color:var(--muted); font-size:12px; margin-top:4px; white-space:nowrap; text-overflow:ellipsis; overflow:hidden}
+.kbd{border:1px solid #2a3a4f; background:#0b1320; border-radius:6px; padding:2px 6px}
+.tip{opacity:.95; font-size:14px}
+.footer{display:flex; gap:12px; flex-wrap:wrap; margin-top:18px; color:var(--muted); font-size:13px}
 .small{font-size:12px; color:#9fb3c9}
 </style>
 </head>
 <body>
 <div class="container"><div class="card">
+
   <div class="meta">
     <span class="badge">Server: <span id="sv">…</span></span>
     <span class="badge">Map: <span id="map">…</span></span>
@@ -53,123 +66,178 @@ a{color:var(--accent); text-decoration:none}
     <span class="badge">Du: <span id="me">…</span></span>
   </div>
 
-  <h1 class="logo">Willkommen auf <span id="sv2">Gaming Mäuse</span> 👋</h1>
+  <h1 class="logo">Willkommen auf <span id="sv2">deinem Server</span> 👋</h1>
 
-  <div class="row">
+  <!-- Stepper -->
+  <div class="stepper">
+    <div class="step active" id="st-work"><div class="dot"></div>Workshop</div>
+    <div class="line"></div>
+    <div class="step" id="st-srv"><div class="dot"></div>Server-Content</div>
+    <div class="line"></div>
+    <div class="step" id="st-init"><div class="dot"></div>Initialisierung</div>
+  </div>
+
+  <div class="grid">
     <div class="box">
-      <strong>Download-Fortschritt</strong>
-      <div class="bar"><div class="fill" id="bar"></div></div>
-      <div class="percent"><span id="pct">0</span>% – <span id="progLabel">Warte auf Daten …</span></div>
-      <div class="status" id="status"></div>
-      <div class="file" id="file"></div>
-      <div class="small" id="counts"></div>
+      <strong>Fortschritt</strong>
+      <div class="row" style="margin-top:6px">
+        <!-- Workshop -->
+        <div>
+          <div class="label"><span>Workshop-Downloads</span><span id="w-pct">0%</span></div>
+          <div class="bar" id="w-bar"><div class="fill" id="w-fill"></div></div>
+          <div class="sub" id="w-sub"></div>
+        </div>
+        <!-- Server -->
+        <div>
+          <div class="label"><span>Server-Content</span><span id="s-pct">0%</span></div>
+          <div class="bar" id="s-bar"><div class="fill" id="s-fill"></div></div>
+          <div class="sub" id="s-sub"></div>
+        </div>
+        <!-- Init -->
+        <div>
+          <div class="label"><span>Initialisierung</span><span id="i-pct">…</span></div>
+          <div class="bar indet" id="i-bar"></div>
+          <div class="sub" id="i-sub">Warte auf Client-Info …</div>
+        </div>
+      </div>
+      <div class="small" style="margin-top:10px">Datei: <span id="file">–</span></div>
     </div>
 
     <div class="box">
       <strong>Tipps</strong>
-      <ul class="tip">
-        <li>Drücke <span class="kbd">F1</span> für Hilfe/Regeln/Settings.</li>
-        <li>Mit <span class="kbd">c</span> öffnest du den TTT2-Shop.</li>
-        <li><span class="kbd">Tab</span> zeigt die Übersicht.</li>
+      <ul class="tip" style="margin:10px 0 0 18px">
+        <li>Drücke <span class="kbd">F1</span> für Hilfe/Regeln.</li>
+        <li><span class="kbd">F2</span> öffnet den TTT2-Shop.</li>
+        <li><span class="kbd">Tab</span> zeigt die Rollen-Übersicht.</li>
       </ul>
       <div class="footer">
-        <span>Website: <a href="https://dk0.dev" id="wb">ttt.dk0.dev</a></span>
+        <span>Website: <a href="https://ttt.dk0.dev">ttt.dk0.dev</a></span>
       </div>
     </div>
   </div>
+
 </div></div>
 
 <script>
 (() => {
-  const $ = (id) => document.getElementById(id);
-  const qs = new URLSearchParams(location.search);
-  const state = {
-    total: 0,
-    needed: 0,
-    lastPct: 0,
-    doneForced: false
+  const $ = id => document.getElementById(id);
+  // Grunddaten aus URL (GMod hängt ?map=%m&sid=%s an)
+  const p = new URLSearchParams(location.search);
+  $('map').textContent = p.get('map') || 'Unbekannt';
+  $('me').textContent  = p.get('sid') || '—';
+
+  // Phasen-State
+  const phases = {
+    work: { elFill: $('w-fill'), elPct: $('w-pct'), elSub: $('w-sub'), elStep: $('st-work'),
+            total:0, needed:0, last:0, done:false },
+    srv:  { elFill: $('s-fill'), elPct: $('s-pct'), elSub: $('s-sub'), elStep: $('st-srv'),
+            total:0, needed:0, last:0, done:false },
+    init: { elBar: $('i-bar'),  elPct: $('i-pct'), elSub: $('i-sub'), elStep: $('st-init'),
+            spin:true, done:false }
   };
+  let current = 'work'; // heuristisch anfangen bei Workshop
 
-  // Fallback-Werte aus URL (nur map/sid sind echt verfügbar)
-  const fallbackMap = qs.get('map') || 'Unbekannt';
-  const fallbackSid = qs.get('sid') || '—';
-  $('map').textContent = fallbackMap;
-  $('me').textContent = fallbackSid;
-
-  // Fortschritt updaten
-  function updateProgress() {
-    let pct = 0;
-    if (state.total > 0) {
-      const done = Math.max(0, state.total - state.needed);
-      pct = Math.round((done / state.total) * 100);
-    }
-    // Sicherstellen, dass es nicht rückwärts springt
-    pct = Math.max(state.lastPct, Math.min(100, pct));
-    state.lastPct = pct;
-
-    $('bar').style.width = pct + '%';
-    $('pct').textContent = pct;
-    $('progLabel').textContent = state.total
-      ? `Lade Dateien (${state.total - state.needed}/${state.total})`
-      : 'Initialisiere Workshop …';
-    $('counts').textContent = state.total
-      ? `${state.total - state.needed} von ${state.total} Dateien`
-      : '';
+  function setActive(key){
+    ['work','srv','init'].forEach(k=>{
+      const c = phases[k].elStep.classList;
+      c.remove('active'); c.remove('done');
+      if (phases[k].done) c.add('done');
+    });
+    phases[key].elStep.classList.add('active');
+    current = key;
   }
 
-  // GMod ruft diese Funktionen auf:
-  window.GameDetails = function(serverName, serverUrl, mapName, maxPlayers, steamID, gamemode, volume, language) {
-    $('sv').textContent = serverName || 'Unbekannt';
+  function setPct(obj, pct, label){
+    pct = Math.max(obj.last||0, Math.min(100, Math.round(pct)));
+    obj.last = pct;
+    obj.elFill.style.width = pct + '%';
+    obj.elPct.textContent = pct + '%';
+    if (label) obj.elSub.textContent = label;
+    if (pct >= 100){ obj.done = true; obj.elStep.classList.add('done'); }
+  }
+
+  // ===== GMod Callbacks =====
+  window.GameDetails = function(serverName, serverUrl, mapName, maxPlayers, steamID, gamemode){
+    $('sv').textContent  = serverName || 'Unbekannt';
     $('sv2').textContent = serverName || 'deinem Server';
-    $('map').textContent = mapName   || fallbackMap;
     $('gm').textContent  = gamemode  || 'TTT2';
-    $('me').textContent  = steamID   || fallbackSid;
+    if (mapName) $('map').textContent = mapName;
+    if (steamID) $('me').textContent = steamID;
   };
 
-  window.SetFilesTotal = function(total) {
-    state.total = Number(total) || 0;
-    updateProgress();
-  };
-
-  window.SetFilesNeeded = function(needed) {
-    state.needed = Number(needed) || 0;
-    updateProgress();
-  };
-
-  window.DownloadingFile = function(name) {
-    // Pfad kürzen für hübschere Anzeige
-    try {
-      const short = (name || '').split('/').slice(-3).join('/');
-      $('file').textContent = short;
-    } catch (_) {
-      $('file').textContent = name || '';
+  window.SetFilesTotal = function(total){
+    total = Number(total) || 0;
+    // Heuristik: wenn innerhalb Workshop der Zähler „neu startet“ (kleiner wird), beginnt oft der Server-Content
+    const phase = phases[current];
+    if (current === 'work' && phase.total && total > 0 && total < phase.total && phase.last >= 95){
+      phases.work.done = true; phases.work.elStep.classList.add('done');
+      setActive('srv');
     }
+    phases[current].total = total;
+    update();
   };
 
-  window.SetStatusChanged = function(status) {
-    $('status').textContent = status || '';
-    // Wenn GMod in späte Phasen geht, Fortschritt „soft“ vollenden
-    const s = (status || '').toLowerCase();
-    if (s.includes('sending client info') || s.includes('workshop complete') || s.includes('precaching') || s.includes('client info')) {
-      state.total = Math.max(state.total, 100);
-      state.needed = 0;
-      updateProgress();
+  window.SetFilesNeeded = function(needed){
+    phases[current].needed = Number(needed) || 0;
+    update();
+  };
+
+  window.DownloadingFile = function(path){
+    $('file').textContent = (path||'').split('/').slice(-3).join('/');
+  };
+
+  window.SetStatusChanged = function(status){
+    const s = (status||'').toLowerCase();
+    // Mapping von Status auf Phasen
+    if (s.includes('workshop')) setActive('work');
+    else if (s.includes('sending client info') || s.includes('precaching') || s.includes('client info') || s.includes('parsing')) {
+      phases.work.done && (phases.work.elStep.classList.add('done'));
+      phases.srv.done  && (phases.srv.elStep.classList.add('done'));
+      setActive('init');
+      phases.init.elPct.textContent = '…';
+      phases.init.elSub.textContent = status || 'Initialisiere …';
     }
+    else if (s.includes('download') || s.includes('materials') || s.includes('models') || s.includes('.bsp') || s.includes('file')) {
+      phases.work.done && (phases.work.elStep.classList.add('done'));
+      setActive('srv');
+    }
+
+    // „Workshop complete“ → zur nächsten Phase
+    if (s.includes('complete') && current === 'work'){
+      phases.work.done = true; setPct(phases.work, 100, 'Workshop abgeschlossen');
+      setActive('srv');
+    }
+
+    // hübscher Status-Text
+    if (current === 'work') phases.work.elSub.textContent = status || '';
+    else if (current === 'srv') phases.srv.elSub.textContent = status || '';
+    else phases.init.elSub.textContent = status || '';
   };
 
-  // Falls GMod die Callbacks nicht liefert (Test im normalen Browser):
+  function update(){
+    // Workshop/Srv: determiniert falls Total > 0
+    ['work','srv'].forEach(k=>{
+      const ph = phases[k];
+      if (ph.total > 0){
+        const done = Math.max(0, ph.total - (ph.needed||0));
+        const pct = (done / ph.total) * 100;
+        setPct(ph, pct, ph.total? `${done} / ${ph.total} Dateien` : '');
+      }else{
+        // Keine Zahlen → Indeterminate (lassen Balken einfach leer)
+        ph.elPct.textContent = ph.done ? '100%' : '…';
+        if (!ph.done && ph.elSub.textContent === '') ph.elSub.textContent = 'Warte auf Daten …';
+      }
+    });
+  }
+
+  // Fallback-Animation im normalen Browser (ohne GMod)
   if (document.visibilityState !== 'hidden') {
-    // Leichte Fake-Animation, bis echte Zahlen kommen
-    let t = 0;
-    const fake = setInterval(() => {
-      if (state.total > 0 || state.doneForced) { clearInterval(fake); return; }
-      t = Math.min(90, t + Math.random() * 8);
-      $('bar').style.width = Math.round(t) + '%';
-      $('pct').textContent = Math.round(t);
-      $('progLabel').textContent = 'Warte auf Spiel-Client …';
-    }, 2500);
-    // Sicherheitsnetz: Nach 25s abschließen, damit der Balken nicht „im ersten Drittel“ stehen bleibt
-    setTimeout(() => { state.doneForced = true; $('bar').style.width = '100%'; $('pct').textContent = '100'; }, 25000);
+    let t = 0, u = 0;
+    const f = setInterval(()=>{
+      if (phases.init.done) { clearInterval(f); return; }
+      if (!phases.work.done) { t = Math.min(100, t + Math.random()*8); setPct(phases.work, t); if (t>=100){ setActive('srv'); } }
+      else if (!phases.srv.done) { u = Math.min(100, u + Math.random()*10); setPct(phases.srv, u); if (u>=100){ setActive('init'); } }
+    }, 1200);
   }
 })();
 </script>
