@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Verbinde …</title>
+<meta http-equiv="Cache-Control" content="no-store" />
+<style>
+:root{--bg:#0b0f14;--card:#0f1620;--muted:#8aa0b3;--accent:#73d7ff;--ok:#8affc1;}
+*{box-sizing:border-box}html,body{height:100%}body{
+  margin:0; font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,Ubuntu,"Helvetica Neue",Arial;
+  color:#e8f0f7; background:radial-gradient(1200px 800px at 80% -10%,#132033 0%,transparent 60%),linear-gradient(180deg,#0b0f14,#0b0f14 60%,#0d1420);
+}
+.container{min-height:100%; display:flex; align-items:center; justify-content:center; padding:24px}
+.card{width:min(920px,94vw); background:linear-gradient(180deg,var(--card),#0c121a);
+  border:1px solid #1a2634; border-radius:16px; padding:26px 28px; box-shadow:0 10px 30px rgba(0,0,0,.35)}
+h1{margin:0 0 6px; font-size:28px; letter-spacing:.2px}
+.meta{display:flex; flex-wrap:wrap; gap:10px 18px; color:var(--muted); font-size:14px; margin-bottom:18px}
+.badge{border:1px solid #243447; padding:6px 10px; border-radius:999px; background:#111926}
+.row{display:grid; grid-template-columns:1fr 1fr; gap:18px}
+.box{border:1px solid #1a2634; border-radius:14px; padding:16px; background:#0c131c}
+ul{margin:10px 0 0 18px; padding:0}
+.tip{opacity:.9; font-size:14px}
+.bar{height:6px; background:#0b1420; border-radius:999px; overflow:hidden; margin-top:14px}
+.fill{height:100%; width:35%; background:linear-gradient(90deg,var(--accent),var(--ok)); animation:load 2.4s infinite ease-in-out}
+@keyframes load{0%{transform:translateX(-35%)}50%{transform:translateX(65%)}100%{transform:translateX(-35%)}}
+.footer{display:flex; gap:12px; flex-wrap:wrap; margin-top:18px; color:var(--muted); font-size:13px}
+.kbd{border:1px solid #2a3a4f; background:#0b1320; border-radius:6px; padding:2px 6px}
+a{color:var(--accent); text-decoration:none}
+.logo{font-weight:700; letter-spacing:.5px}
+</style>
+</head>
+<body>
+<div class="container"><div class="card">
+  <div class="meta">
+    <span class="badge">Server: <span id="sv">…</span></span>
+    <span class="badge">Map: <span id="map">…</span></span>
+    <span class="badge">Modus: <span id="gm">…</span></span>
+    <span class="badge">Du: <span id="me">…</span></span>
+  </div>
+  <h1 class="logo">Willkommen auf <span id="sv2">deinem Server</span> 👋</h1>
+  <div class="row">
+    <div class="box">
+      <strong>Tipps</strong>
+      <ul class="tip">
+        <li>Drücke <span class="kbd">F1</span> für Hilfe/Regeln.</li>
+        <li>Mit <span class="kbd">F2</span> kommst du ins Shop-Menü (TTT2).</li>
+        <li><span class="kbd">Tab</span> zeigt die Rollen-Übersicht.</li>
+      </ul>
+      <div class="bar"><div class="fill"></div></div>
+    </div>
+    <div class="box">
+      <strong>Regeln (Kurz)</strong>
+      <ul class="tip">
+        <li>Kein RDM / kein Ghosting.</li>
+        <li>Höflich bleiben, keine Beleidigungen.</li>
+        <li>Admin-Anweisungen folgen.</li>
+      </ul>
+      <div class="footer">
+        <span>Discord: <a href="#" id="dc">später eintragen</a></span>
+        <span>Website: <a href="#" id="wb">ttt.dk0.dev</a></span>
+      </div>
+    </div>
+  </div>
+</div></div>
+<script>
+(function(){
+  const p=new URLSearchParams(location.search);
+  const map=p.get('map')||'Unbekannt', gm=p.get('gm')||'TTT2', name=p.get('name')||'Spieler', sv=p.get('name')?p.get('name'):document.title;
+  const host=p.get('name')||'Gaming Mäuse - TTT';
+  const el=(id,v)=>{const e=document.getElementById(id); if(e) e.textContent=v};
+  el('map', map); el('gm', gm); el('me', name); el('sv', host); el('sv2', host);
+})();
+</script>
+</body>
+</html>
