@@ -6,9 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-store" />
 <title>Verbinde …</title>
 <style>
-:root{
-  --bg:#0b0f14; --card:#0f1620; --muted:#8aa0b3; --accent:#73d7ff; --ok:#8affc1;
-}
+:root{--bg:#0b0f14;--card:#0f1620;--muted:#8aa0b3;--accent:#73d7ff;--ok:#8affc1}
 *{box-sizing:border-box} html,body{height:100%}
 body{
   margin:0; font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Ubuntu,"Helvetica Neue",Arial;
@@ -18,54 +16,29 @@ body{
 }
 .container{min-height:100%; display:flex; align-items:center; justify-content:center; padding:24px}
 .card{
-  width:min(960px,94vw); background:linear-gradient(180deg,var(--card),#0c121a);
+  width:min(820px,94vw); background:linear-gradient(180deg,var(--card),#0c121a);
   border:1px solid #1a2634; border-radius:16px; padding:26px 28px; box-shadow:0 10px 30px rgba(0,0,0,.35)
 }
 h1{margin:0 0 8px; font-size:28px; letter-spacing:.2px}
 .meta{display:flex; flex-wrap:wrap; gap:10px 18px; color:var(--muted); font-size:14px; margin-bottom:18px}
 .badge{border:1px solid #243447; padding:6px 10px; border-radius:999px; background:#111926}
-.grid{display:grid; grid-template-columns:1fr 1fr; gap:18px}
-.box{border:1px solid #1a2634; border-radius:14px; padding:16px; background:#0c131c}
-a{color:var(--accent); text-decoration:none}
 .logo{font-weight:700; letter-spacing:.5px}
 
-/* Stepper */
-.stepper{display:flex; align-items:center; gap:12px; margin-bottom:10px}
-.step{display:flex; align-items:center; gap:10px; color:var(--muted); font-size:14px}
-.dot{width:14px; height:14px; border-radius:50%; background:#1a2534; border:1px solid #253247}
-.step.active .dot{background:var(--accent); box-shadow:0 0 0 4px rgba(115,215,255,.18)}
-.step.done .dot{background:var(--ok)}
-.line{height:2px; flex:1; background:#1a2534}
-
-/* Bars (indeterminate runner) */
-.bar{position:relative; height:10px; background:#0b1420; border-radius:999px; overflow:hidden; margin-top:8px}
+.bar{position:relative; height:12px; background:#0b1420; border-radius:999px; overflow:hidden; margin:14px 0 6px}
 .runner{
-  position:absolute; top:0; bottom:0; width:38%; left:-38%;
-  background:linear-gradient(90deg, rgba(115,215,255,.15), rgba(138,255,193,.25), rgba(115,215,255,.15));
+  position:absolute; top:0; bottom:0; width:35%; left:-35%;
+  background:linear-gradient(90deg, rgba(115,215,255,.18), rgba(138,255,193,.3), rgba(115,215,255,.18));
   border-radius:999px; filter:saturate(140%);
-  animation:run 1.6s linear infinite;
+  animation:run 1.5s linear infinite;
 }
-.fill{
-  position:absolute; inset:0 auto 0 0; width:0%;
-  background:linear-gradient(90deg,var(--accent),var(--ok));
-  border-radius:999px; transition:width .25s ease-in-out;
-}
-.bar.done .runner{display:none}
-.bar.done .fill{width:100%}
+@keyframes run{0%{transform:translateX(0)}100%{transform:translateX(260%)}}
 
-/* Rows & small text */
-.row{display:grid; gap:10px}
-.label{display:flex; justify-content:space-between; gap:12px; font-size:14px; color:#cfe3f5}
-.sub{color:var(--muted); font-size:12px; margin-top:4px; white-space:nowrap; text-overflow:ellipsis; overflow:hidden}
+.sub{color:var(--muted); font-size:12px; white-space:nowrap; text-overflow:ellipsis; overflow:hidden}
 .kbd{border:1px solid #2a3a4f; background:#0b1320; border-radius:6px; padding:2px 6px}
-.tip{opacity:.95; font-size:14px}
-.footer{display:flex; gap:12px; flex-wrap:wrap; margin-top:18px; color:var(--muted); font-size:13px}
+.tip{opacity:.95; font-size:14px; margin:10px 0 0 18px}
+.footer{display:flex; gap:12px; flex-wrap:wrap; margin-top:14px; color:var(--muted); font-size:13px}
 .small{font-size:12px; color:#9fb3c9}
-
-@keyframes run{
-  0%   { transform:translateX(0) }
-  100% { transform:translateX(260%) }
-}
+.box{border:1px solid #1a2634; border-radius:14px; padding:16px; background:#0c131c; margin-top:12px}
 </style>
 </head>
 <body>
@@ -80,89 +53,40 @@ a{color:var(--accent); text-decoration:none}
 
   <h1 class="logo">Willkommen auf <span id="sv2">deinem Server</span> 👋</h1>
 
-  <!-- Stepper -->
-  <div class="stepper">
-    <div class="step active" id="st-work"><div class="dot"></div>Workshop</div>
-    <div class="line"></div>
-    <div class="step" id="st-srv"><div class="dot"></div>Server-Content</div>
-    <div class="line"></div>
-    <div class="step" id="st-init"><div class="dot"></div>Initialisierung</div>
-  </div>
+  <div class="bar"><div class="runner"></div></div>
+  <div class="sub" id="status">Verbinde …</div>
+  <div class="small" style="margin-top:8px">Datei: <span id="file">–</span></div>
 
-  <div class="grid">
-    <div class="box">
-      <strong>Fortschritt</strong>
-      <div class="row" style="margin-top:6px">
-        <!-- Workshop -->
-        <div>
-          <div class="label"><span>Workshop-Downloads</span><span id="w-state">läuft …</span></div>
-          <div class="bar" id="w-bar"><div class="runner"></div><div class="fill"></div></div>
-          <div class="sub" id="w-sub"></div>
-        </div>
-        <!-- Server -->
-        <div>
-          <div class="label"><span>Server-Content</span><span id="s-state">wartet …</span></div>
-          <div class="bar" id="s-bar"><div class="runner"></div><div class="fill"></div></div>
-          <div class="sub" id="s-sub"></div>
-        </div>
-        <!-- Init -->
-        <div>
-          <div class="label"><span>Initialisierung</span><span id="i-state">wartet …</span></div>
-          <div class="bar" id="i-bar"><div class="runner"></div><div class="fill"></div></div>
-          <div class="sub" id="i-sub">Warte auf Client-Info …</div>
-        </div>
-      </div>
-      <div class="small" style="margin-top:10px">Datei: <span id="file">–</span></div>
-    </div>
-
-    <div class="box">
-      <strong>Tipps</strong>
-      <ul class="tip" style="margin:10px 0 0 18px">
-        <li>Drücke <span class="kbd">F1</span> für Hilfe/Regeln.</li>
-        <li><span class="kbd">F2</span> öffnet den TTT2-Shop.</li>
-        <li><span class="kbd">Tab</span> zeigt die Rollen-Übersicht.</li>
-      </ul>
-      <div class="footer">
-        <span>Website: <a href="https://ttt.dk0.dev">ttt.dk0.dev</a></span>
-      </div>
+  <div class="box">
+    <strong>Tipps</strong>
+    <ul class="tip">
+      <li>Drücke <span class="kbd">F1</span> für Hilfe/Regeln.</li>
+      <li><span class="kbd">F2</span> öffnet den TTT2-Shop.</li>
+      <li><span class="kbd">Tab</span> zeigt die Rollen-Übersicht.</li>
+    </ul>
+    <div class="footer">
+      <span>Website: <a href="https://ttt.dk0.dev">ttt.dk0.dev</a></span>
     </div>
   </div>
 
 </div></div>
 
 <script>
-(() => {
+(()=> {
   const $ = id => document.getElementById(id);
   const p = new URLSearchParams(location.search);
 
-  // Grunddaten (Map aus URL, Name bevorzugt aus ?name= / ?nick=, sonst SteamID)
+  // Grunddaten: Name bevorzugt aus ?name=/?.nick, sonst aus GameDetails (SteamID)
   $('map').textContent = p.get('map') || 'Unbekannt';
   const urlName = p.get('name') || p.get('nick');
   if (urlName) $('me').textContent = urlName;
 
-  // Helper: Steps/Bars steuern
-  const steps = {
-    work: { step:$('st-work'), bar:$('w-bar'), state:$('w-state'), sub:$('w-sub'), done:false },
-    srv:  { step:$('st-srv'),  bar:$('s-bar'), state:$('s-state'), sub:$('s-sub'), done:false },
-    init: { step:$('st-init'), bar:$('i-bar'), state:$('i-state'), sub:$('i-sub'), done:false }
-  };
-  let current = 'work';
-
-  function setActive(k){
-    ['work','srv','init'].forEach(x=>{
-      steps[x].step.classList.remove('active');
-      if (steps[x].done) steps[x].step.classList.add('done');
-    });
-    steps[k].step.classList.add('active');
-    current = k;
-  }
-  function markDone(k, label){
-    const s = steps[k];
-    if (s.done) return;
-    s.done = true;
-    s.bar.classList.add('done');     // stop runner, fill = 100%
-    s.step.classList.add('done');    // green dot
-    if (label) s.state.textContent = label;
+  // Kürzerer Dateiname: letzte 2–3 Segmente, vorne ggf. ellipsen
+  function shortPath(path){
+    if (!path) return '–';
+    const parts = path.split('/').filter(Boolean);
+    const tail = parts.slice(-3).join('/');
+    return tail.length > 48 ? '…' + tail.slice(-48) : tail;
   }
 
   // ===== GMod Callbacks =====
@@ -170,67 +94,26 @@ a{color:var(--accent); text-decoration:none}
     $('sv').textContent  = serverName || 'Unbekannt';
     $('sv2').textContent = serverName || 'deinem Server';
     $('gm').textContent  = gamemode  || 'TTT2';
-    if (mapName)  $('map').textContent = mapName;
-    // Spieleranzeige: URL-Name hat Vorrang, sonst SteamID
+    if (mapName) $('map').textContent = mapName;
     if (!urlName && steamID) $('me').textContent = steamID;
   };
-
-  // Wir ignorieren Zahlen komplett – nur hübscher Dateiname
-  window.SetFilesTotal = function(){};   // bewusst leer
-  window.SetFilesNeeded = function(){};  // bewusst leer
-  window.DownloadingFile = function(path){
-    $('file').textContent = (path||'').split('/').slice(-3).join('/');
-  };
-
-  // Status-Mapping auf Phasen
   window.SetStatusChanged = function(status){
-    const raw = status || '';
-    const s = raw.toLowerCase();
-
-    // Workshop-Phase sichtbar halten
-    if (s.includes('workshop')) {
-      setActive('work');
-      steps.work.state.textContent = 'läuft …';
-      steps.work.sub.textContent = raw;
-    }
-
-    // Übergang: Workshop -> Server-Content
-    if ((s.includes('download') || s.includes('materials') || s.includes('models') || s.includes('.bsp') || s.includes('file')) && !steps.srv.done) {
-      // Falls wir noch im Workshop hängen, schließe den ab
-      if (!steps.work.done) markDone('work','fertig');
-      setActive('srv');
-      steps.srv.state.textContent = 'lädt …';
-      steps.srv.sub.textContent = raw;
-    }
-
-    // Workshop explizit fertig
-    if (s.includes('workshop complete') || s.includes('finished') && s.includes('workshop')) {
-      markDone('work','fertig');
-      setActive('srv');
-    }
-
-    // Übergang: Server-Content -> Initialisierung
-    if (s.includes('sending client info') || s.includes('precaching') || s.includes('parsing') || s.includes('client info')) {
-      if (!steps.work.done) markDone('work','fertig');
-      if (!steps.srv.done)  markDone('srv','fertig');
-      setActive('init');
-      steps.init.state.textContent = 'startet …';
-      steps.init.sub.textContent   = raw;
-    }
-
-    // Hübscher Subtext je Phase
-    if (current === 'work') steps.work.sub.textContent = raw;
-    else if (current === 'srv') steps.srv.sub.textContent = raw;
-    else steps.init.sub.textContent = raw;
+    $('status').textContent = status || '…';
   };
+  window.DownloadingFile = function(path){
+    $('file').textContent = shortPath(path||'');
+  };
+  window.SetFilesTotal = function(){};    // bewusst ignoriert
+  window.SetFilesNeeded = function(){};   // bewusst ignoriert
 
-  // Fallback im normalen Browser (zum Testen): Animation laufen lassen, nach etwas Zeit Phasen „fertig“ setzen
+  // Fallback im normalen Browser (zum Testen)
   if (document.visibilityState !== 'hidden' && !/gmod/i.test(navigator.userAgent||'')) {
-    setTimeout(()=>{ steps.work.sub.textContent='Workshop (Demo)'; }, 400);
-    setTimeout(()=>{ markDone('work','fertig'); setActive('srv'); steps.srv.sub.textContent='Server-Content (Demo)'; }, 3500);
-    setTimeout(()=>{ markDone('srv','fertig'); setActive('init'); steps.init.sub.textContent='Initialisierung (Demo)'; }, 7000);
-  }
-})();
-</script>
-</body>
-</html>
+    $('sv').textContent='Gaming Mäuse - TTT'; $('gm').textContent='TTT2'; $('me').textContent='DemoUser';
+    let i=0; const demo = [
+      'Checking workshop subscriptions…',
+      'Mounting addons…',
+      'Downloading materials/…',
+      'Sending client info…'
+    ];
+    setInterval(()=>{$('status').textContent=demo[i++%demo.length]},1500);
+    setInterval(()=>{$('file
